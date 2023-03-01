@@ -23,7 +23,7 @@ calculate_branching_point_feature_importance <- function(
     mutate(contains = TRUE) %>%
     reshape2::acast(cell_id~edge_id, value.var = "contains", fill = FALSE)
 
-  expression <- get_expression(trajectory, expression_source)
+  expression <- dynwrap::get_expression(trajectory, expression_source)
 
   map_df(
     seq_along(milestones_oi),
@@ -54,11 +54,10 @@ calculate_branching_point_feature_importance <- function(
           fi_method = fi_method,
           verbose = verbose
         ) %>%
-          transmute(
-            milestone_id = factor(milestone_oi, levels = trajectory$milestone_ids),
-            .data$feature_id,
-            .data$importance
-          )
+          mutate(
+            milestone_id = factor(milestone_oi, levels = trajectory$milestone_ids)
+          ) %>%
+          select(all_of(c("milestone_id", "feature_id", "importance")))
       }
     }
   )

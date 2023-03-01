@@ -23,7 +23,7 @@ calculate_branch_feature_importance <- function(
     mutate(contains = TRUE) %>%
     reshape2::acast(cell_id ~ edge_id, value.var = "contains", fill = FALSE)
 
-  expression <- get_expression(trajectory, expression_source)
+  expression <- dynwrap::get_expression(trajectory, expression_source)
 
   out <- calculate_feature_importances(
     X = expression,
@@ -37,10 +37,9 @@ calculate_branch_feature_importance <- function(
   })
 
   out %>%
-    transmute(
-      .data$feature_id,
+    mutate(
       from = factor(.data$from, trajectory$milestone_ids),
-      to = factor(.data$to, trajectory$milestone_ids),
-      .data$importance
-    )
+      to = factor(.data$to, trajectory$milestone_ids)
+    ) %>%
+    select(all_of(c("feature_id", "from", "to", "importance")))
 }
